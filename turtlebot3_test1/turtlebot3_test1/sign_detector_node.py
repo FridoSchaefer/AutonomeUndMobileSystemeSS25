@@ -7,13 +7,14 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import String
 import cv2
 import numpy as np
+from std_msgs.msg import Float32
 
 class SignDetectorNode(Node):
     def __init__(self):
         super().__init__('sign_detector_node')
         self.get_logger().info("Sign Detector Node gestartet.")
 
-        self.debug_mode = True
+        self.debug_mode = True # Debug-Modus aktivieren, um Bilder anzuzeigen
 
         # Pfad zum Paket-Share-Verzeichnis, wo die Bilder liegen
         # WICHTIG: Dies muss in setup.py konfiguriert werden!
@@ -28,6 +29,7 @@ class SignDetectorNode(Node):
             "red_light": cv2.imread(f"{package_share_directory}/images/redlight.png"),
             "tunnel": cv2.imread(f"{package_share_directory}/images/tunnel.png"),
             "construction": cv2.imread(f"{package_share_directory}/images/construction.png"),
+            "stop": cv2.imread(f"{package_share_directory}/images/stop.png"),
         }
         
         # Überprüfen, ob Bilder geladen wurden
@@ -65,6 +67,7 @@ class SignDetectorNode(Node):
         self.image_sub = self.create_subscription(Image, "/camera/image_raw", self.image_callback, 10)
         self.sign_pub = self.create_publisher(String, "/detected_sign", 10)
         self.traffic_light_pub = self.create_publisher(String, "/detected_traffic_light", 10)
+        self.brightness_pub = self.create_publisher(Float32, "/environment/brightness", 10)
 
         # Performance: Bildverarbeitung nicht bei jedem Frame
         self.detection_interval = 5 # Nur jeden 5. Frame verarbeiten
@@ -79,6 +82,11 @@ class SignDetectorNode(Node):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
             debug_image = cv_image.copy()
+
+            #Graustufenbild für Helligkeitserkennung
+            gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+            average_brightness = np.mean(gray_image)
+            self.brightness_pub.publish(Float32(data=average_brightness))
 
             # Erkennung durchführen
             detected_light = self.detect_traffic_light_blob(cv_image, debug_image)
