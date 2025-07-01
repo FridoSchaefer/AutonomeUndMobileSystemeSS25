@@ -129,7 +129,7 @@ class ParkingManager:
             self.node.publisher_.publish(Twist(angular=Vector3(z=angular_z)))
     
     def _drive_in(self):
-        drive_duration = 5.0 # timer fürs einfahren
+        drive_duration = 5.5 # timer fürs einfahren
         self.logger.info("Parking Phase: Fahre in Parklücke...")
 
         if self.phase_timer is not None and (self.node.get_clock().now() - self.phase_timer).nanoseconds > (drive_duration * 1e9):
@@ -150,7 +150,7 @@ class ParkingManager:
             self.node.stop_robot()
 
     def _drive_out(self):
-        drive_duration = 3.5 # Dieselbe Zeit wie beim Einfahren
+        drive_duration = 5.5 # Dieselbe Zeit wie beim Einfahren
         self.logger.info("Parking Phase: Fahre rückwärts aus Parklücke...")
 
         if self.phase_timer is not None and (self.node.get_clock().now() - self.phase_timer).nanoseconds > (drive_duration * 1e9):
@@ -161,7 +161,7 @@ class ParkingManager:
             self.node.publisher_.publish(Twist(linear=Vector3(x=-0.05))) # Rückwärts
 
     def _realign_on_track(self):
-        turn_duration = 3.0 # Dieselbe Zeit wie beim Ausrichten
+        turn_duration = 5.5 # andere Zeit wegen komischem winkel vom linefollower
         # In die entgegengesetzte Richtung drehen, um wieder gerade zu stehen
         angular_z = -0.4 if self.target_spot == "right" else 0.4 # für insgesamt 180 grade drehung
         self.logger.info("Parking Phase: Richte zurück zur Strecke aus...")
