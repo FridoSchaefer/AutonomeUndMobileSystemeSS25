@@ -124,6 +124,9 @@ class LineFollowerNode(Node):
         # 3. Park-Schild starten (nur wenn nicht schon geparkt wird)
         if sign == "park" and self.robot_state != RobotState.PARKING:
             self.get_logger().info("===> Park-Schild erkannt! Übergebe Kontrolle an ParkingManager.")
+            
+            self.follow_white_line = False
+            
             self.robot_state = RobotState.PARKING
             self.parking_manager = ParkingManager(self, self.get_logger())
             self.parking_manager.start()
@@ -148,13 +151,23 @@ class LineFollowerNode(Node):
         
         if self.robot_state == RobotState.OBSTACLE_AVOIDANCE:
             self.obstacle_manager.execute()
-            # Der Manager wird nicht mehr durch is_finished() beendet, sondern durch ein Schild.
+            if self.obstacle_manager.is_finished():
+                self.get_logger().info("Baustellen-Manöver erfolgreich abgeschlossen. Kehre zur Linienverfolgung zurück.")
+                self.robot_state = RobotState.LINE_FOLLOWING
+                self.follow_white_line = True 
+                self.obstacle_manager = ObstacleAvoidanceManager(self, self.get_logger())
+                return 
             is_in_maneuver = self.is_in_active_maneuver()
         
         elif self.robot_state == RobotState.PARKING:
             self.parking_manager.execute()
             if self.parking_manager.is_finished():
+                self.get_logger().info("ParkingManager ist fertig. Kehre zur Linienverfolgung zurück.")
                 self.robot_state = RobotState.LINE_FOLLOWING
+                # Nach dem Parken soll der Roboter wieder der gelben Linie folgen.
+                self.follow_white_line = False
+                
+                self.parking_manager = ParkingManager(self, self.get_logger())
         
         elif self.robot_state == RobotState.WAITING_FOR_BARRIER:
             self.barrier_manager.execute()
