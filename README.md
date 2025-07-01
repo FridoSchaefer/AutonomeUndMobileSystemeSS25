@@ -1,3 +1,1 @@
-Habe es ohne Behavior Trees gemacht, da ich da nicht wirklich hinter gestiegen bin.
-Logik passiert in der line_follower_node.py
-vieleicht reichts ja alles in allem für ne 4.0
+Als state machine umgesetzt. Ampel funktioniert zu 100%, lineFollower geht auch. Kreisel geht immer, nur nicht wenn das "right" oder "left" Schild zu spät erkannt wird. Construction klappt zu 100%. Parken geht halbwegs, wenn das Schild korrekt erkannt wird. Alles danach ist rein logisch implementiert aber noch nicht getestet.
