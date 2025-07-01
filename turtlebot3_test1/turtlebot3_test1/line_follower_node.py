@@ -99,7 +99,6 @@ class LineFollowerNode(Node):
         sign = msg.data
         self.get_logger().info(f"Schild erkannt: '{sign}'")
         
-        # Normale Fahrt oder Kreisel
         if self.robot_state == RobotState.LINE_FOLLOWING:
             if sign == "intersection": self.is_at_intersection = True
             elif self.is_at_intersection and sign in ["right", "left"]:
@@ -107,13 +106,11 @@ class LineFollowerNode(Node):
                 self.follow_white_line = (sign == "right")
                 self.is_at_intersection = False
         
-        # 1. Park-Schild beendet IMMER den Baustellen-Modus
         if sign == "park" and self.robot_state == RobotState.OBSTACLE_AVOIDANCE:
             self.get_logger().info("Park-Schild nach Baustelle erkannt. Kehre zu normaler Fahrt zurück.")
             self.robot_state = RobotState.LINE_FOLLOWING
-            self.follow_white_line = False # Zurück zur gelben Linie für die Parkplatzsuche
+            self.follow_white_line = False
         
-        # 2. Baustellenschild starten (nur wenn nicht schon in einem anderen Manöver)
         if sign == "construction" and self.robot_state in [RobotState.LINE_FOLLOWING, RobotState.ROUNDABOUT_NAVIGATION]:
             self.get_logger().info("===> Baustelle erkannt! Leite sofortigen Spurwechsel nach rechts ein.")
             self.robot_state = RobotState.OBSTACLE_AVOIDANCE
@@ -121,23 +118,18 @@ class LineFollowerNode(Node):
             self.obstacle_manager = ObstacleAvoidanceManager(self, self.get_logger())
             self.obstacle_manager.start()
 
-        # 3. Park-Schild starten (nur wenn nicht schon geparkt wird)
         if sign == "park" and self.robot_state != RobotState.PARKING:
             self.get_logger().info("===> Park-Schild erkannt! Übergebe Kontrolle an ParkingManager.")
-            
             self.follow_white_line = False
-            
             self.robot_state = RobotState.PARKING
             self.parking_manager = ParkingManager(self, self.get_logger())
             self.parking_manager.start()
         
-        # Schranke
         if sign == "stop" and self.robot_state != RobotState.WAITING_FOR_BARRIER:
             self.robot_state = RobotState.WAITING_FOR_BARRIER
             self.barrier_manager = BarrierManager(self, self.get_logger())
             self.barrier_manager.start()
         
-        # Tunnel
         if sign == "tunnel" and self.robot_state != RobotState.APPROACHING_TUNNEL:
             self.robot_state = RobotState.APPROACHING_TUNNEL
 
@@ -162,10 +154,11 @@ class LineFollowerNode(Node):
         elif self.robot_state == RobotState.PARKING:
             self.parking_manager.execute()
             if self.parking_manager.is_finished():
-                self.get_logger().info("ParkingManager ist fertig. Kehre zur Linienverfolgung zurück.")
+                self.get_logger().info("ParkingManager hat das gesamte Manöver (inkl. Stabilisierung) beendet.")
                 self.robot_state = RobotState.LINE_FOLLOWING
-                # Nach dem Parken soll der Roboter wieder der gelben Linie folgen.
-                self.follow_white_line = False
+                #weiße linie für S-Kurve
+                self.get_logger().info("Wechsle auf die weiße Linie für die S-Kurve.")
+                self.follow_white_line = True 
                 
                 self.parking_manager = ParkingManager(self, self.get_logger())
         

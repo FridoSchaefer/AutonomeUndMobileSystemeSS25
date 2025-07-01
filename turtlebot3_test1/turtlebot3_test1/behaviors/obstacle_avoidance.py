@@ -52,7 +52,7 @@ class ObstacleAvoidanceManager:
         front_sector = self.node.lidar_ranges[355:360] + self.node.lidar_ranges[0:6]
         return min([r for r in front_sector if r > 0.1]) if any(r > 0.1 for r in front_sector) else float('inf')
 
-    ### Generische Choreografie-Bausteine ###
+    ### Choreografie-Bausteine ###
     def _execute_turn(self, duration, angular_velocity, next_phase):
         if self.phase_timer is None: self.phase_timer = self.node.get_clock().now()
         direction = "LINKS" if angular_velocity > 0 else "RECHTS"
