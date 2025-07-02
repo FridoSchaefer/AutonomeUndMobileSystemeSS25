@@ -21,7 +21,6 @@ class SignDetectorNode(Node):
             "right": cv2.imread(f"{package_share_directory}/images/right.png"),
             "left": cv2.imread(f"{package_share_directory}/images/left.png"),
             "park": cv2.imread(f"{package_share_directory}/images/park.png"),
-            # "red_light" wurde entfernt, da es nicht verwendet wird
             "green_light": cv2.imread(f"{package_share_directory}/images/greenlight.png"),
             "tunnel": cv2.imread(f"{package_share_directory}/images/tunnel.png"),
             "construction": cv2.imread(f"{package_share_directory}/images/construction.png"),

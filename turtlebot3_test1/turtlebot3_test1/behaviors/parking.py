@@ -114,7 +114,7 @@ class ParkingManager:
             self.node.publisher_.publish(Twist(angular=Vector3(z=angular_z)))
     
     def _drive_in(self):
-        drive_duration = 6.5
+        drive_duration = 7.0
         self.logger.info("Parking Phase: Fahre in Parklücke...")
         if self.phase_timer is not None and (self.node.get_clock().now() - self.phase_timer).nanoseconds > (drive_duration * 1e9):
             self.phase = ParkingPhase.WAITING_IN_SPOT
@@ -133,7 +133,7 @@ class ParkingManager:
             self.node.stop_robot()
 
     def _drive_out(self):
-        drive_duration = 6.5
+        drive_duration = 7.0
         self.logger.info("Parking Phase: Fahre rückwärts aus Parklücke...")
         if self.phase_timer is not None and (self.node.get_clock().now() - self.phase_timer).nanoseconds > (drive_duration * 1e9):
             self.phase = ParkingPhase.REALIGN_ON_TRACK
